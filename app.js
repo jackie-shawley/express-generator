@@ -3,13 +3,17 @@ var express = require('express'); //created by Express Generator
 var path = require('path'); //created by Express Generator
 var cookieParser = require('cookie-parser'); //created by Express Generator
 var logger = require('morgan'); //created by Express Generator
+const session = require('express-session');
+const FileStore = require('session-file-store')(session); //when you have two sets of paramaters like this, the initial function returns a function, then it is immediately called in the second parameter list. we must do this to use the FileStore in our app
 
 var indexRouter = require('./routes/index'); //created by Express Generator
 var usersRouter = require('./routes/users'); //created by Express Generator
 const campsiteRouter = require('./routes/campsiteRouter');
 const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
+
 const mongoose = require('mongoose');
+
 
 const url = 'mongodb://localhost:27017/nucampsite';
 const connect = mongoose.connect(url, {
@@ -32,23 +36,32 @@ app.set('view engine', 'jade');
 app.use(logger('dev')); //created by Express Generator
 app.use(express.json()); //created by Express Generator
 app.use(express.urlencoded({ extended: false })); //created by Express Generator
-app.use(cookieParser('12345-67890-09876-54321')); //created by Express Generator
+//app.use(cookieParser('12345-67890-09876-54321')); //created by Express Generator; the key passed in can be anything you want it to be
+
+app.use(session({
+  name: 'session-id',
+  secret: '12345-67890-54321',
+  saveUninitialized: false,
+  resave: false,
+  store: new FileStore()
+}));
 
 function auth(req, res, next) {
-  if(!req.signedCookies.user) {
+  console.log(req.session);
+
+  if(!req.session.user) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       const err = new Error('You are not authenticated!');
       res.setHeader('WWW-Authenticate', 'Basic');
       err.status = 401;
       return next(err);
-    }
-
+    } 
     const auth = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':'); //Buffer is a global class belonging to Node, and .from is a static method of it. .split and .toString belong to vanilla JavaScript
     const user = auth[0];
     const pass = auth[1];
     if (user === 'admin' && pass === 'password') {
-      res.cookie('user', 'admin', {signed: true})
+      req.session.user = 'admin';
       return next(); //authorized
     } else {
       const err = new Error('You are not authenticated!');
@@ -57,7 +70,7 @@ function auth(req, res, next) {
       return next(err);
     }
   } else {
-    if (req.signedCookies.user === 'admin') {
+    if (req.session.user === 'admin') {
       return next();
     } else {
       const err = new Error('You are not authenticated!');

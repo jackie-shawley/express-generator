@@ -10,6 +10,7 @@ var usersRouter = require('./routes/users'); //created by Express Generator
 const campsiteRouter = require('./routes/campsiteRouter');
 const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
+const uploadRouter = require('./routes/uploadRouter');
 
 const mongoose = require('mongoose');
 
@@ -54,6 +55,7 @@ app.use(express.static(path.join(__dirname, 'public'))); //created by Express Ge
 app.use('/campsites', campsiteRouter);
 app.use('/promotions', promotionRouter);
 app.use('/partners', partnerRouter);
+app.use('/imageUpload', uploadRouter);
 
 
 

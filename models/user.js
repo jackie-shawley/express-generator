@@ -14,7 +14,7 @@ const userSchema = new Schema({
     facebookId: String,  //if you're only adding a type field, you don't need to specify type
     admin: {
         type: Boolean,
-        default: false
+        default: true
     }
 });
 

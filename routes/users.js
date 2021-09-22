@@ -10,16 +10,17 @@ const router = express.Router();
 router.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     User.find()
     .populate()
-    .then( users => {
+    .then(users => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(users);
-        next();
+        //next();
     }) 
     .catch(err => next(err)); 
 });
 
 router.post('/signup', cors.corsWithOptions, (req, res) => {
+  console.log(req.body)
   User.register(
       new User({username: req.body.username}),
       req.body.password,
@@ -34,6 +35,9 @@ router.post('/signup', cors.corsWithOptions, (req, res) => {
               }
               if (req.body.lastname) {
                 user.lastname = req.body.lastname;
+              }
+              if (req.body.admin === true) {
+                user.admin = req.body.admin;
               }
               user.save(err => {
                 if (err) {
